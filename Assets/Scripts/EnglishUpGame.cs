@@ -6,13 +6,6 @@ using TMPro;
 
 public class EnglishUpGame : MonoBehaviour
 {
-    public class QuizQuestion
-    {
-        public string EnglishWord;
-        public string RussianTranslation;
-        public Sprite Image;
-    }
-
     public static readonly string[] EnglishWords =
     {
         "Apple", "Banana", "Orange", "Cat", "Dog", "House", "Book", "Car", "Sun", "Tree",
@@ -25,49 +18,49 @@ public class EnglishUpGame : MonoBehaviour
         "Школа", "Вода", "Молоко", "Хлеб", "Стул", "Стол", "Цветок", "Рыба", "Птица", "Компьютер"
     };
 
-    static readonly int QuestionsPerGame = 10;
-    static readonly int PointsPerAnswer = 10;
-    static readonly float AnswerDelaySeconds = 1.2f;
+    private static readonly int QuestionsPerGame = 10;
+    private static readonly int PointsPerAnswer = 10;
+    private static readonly float AnswerDelaySeconds = 1.2f;
 
-    static readonly Color NormalButtonColor = new Color32(255, 255, 255, 255);
-    static readonly Color CorrectButtonColor = new Color32(76, 175, 80, 255);
-    static readonly Color WrongButtonColor = new Color32(229, 57, 53, 255);
-    static readonly Color NormalTextColor = new Color32(23, 62, 122, 255);
-    static readonly Color HighlightTextColor = new Color32(255, 255, 255, 255);
+    private static readonly Color NormalButtonColor = new Color32(255, 255, 255, 255);
+    private static readonly Color CorrectButtonColor = new Color32(76, 175, 80, 255);
+    private static readonly Color WrongButtonColor = new Color32(229, 57, 53, 255);
+    private static readonly Color NormalTextColor = new Color32(23, 62, 122, 255);
+    private static readonly Color HighlightTextColor = new Color32(255, 255, 255, 255);
 
-    public GameObject MenuScreen;
-    public GameObject GameScreen;
-    public GameObject ResultsScreen;
+    [SerializeField] private GameObject MenuScreen;
+    [SerializeField] private GameObject GameScreen;
+    [SerializeField] private GameObject ResultsScreen;
 
-    public Button StartButton;
-    public Button ExitButton;
-    public Button PlayAgainButton;
-    public Button MenuButton;
+    [SerializeField] private Button StartButton;
+    [SerializeField] private Button ExitButton;
+    [SerializeField] private Button PlayAgainButton;
+    [SerializeField] private Button MenuButton;
 
-    public TMP_Text QuestionCounterText;
-    public TMP_Text ScoreText;
-    public TMP_Text EnglishWordText;
-    public Image CardImage;
-    public Button[] AnswerButtons;
-    public TMP_Text[] AnswerTexts;
+    [SerializeField] private TMP_Text QuestionCounterText;
+    [SerializeField] private TMP_Text ScoreText;
+    [SerializeField] private TMP_Text EnglishWordText;
+    [SerializeField] private Image CardImage;
+    [SerializeField] private Button[] AnswerButtons;
+    [SerializeField] private TMP_Text[] AnswerTexts;
 
-    public TMP_Text ResultScoreText;
-    public TMP_Text ResultCorrectText;
-    public TMP_Text ResultWrongText;
+    [SerializeField] private TMP_Text ResultScoreText;
+    [SerializeField] private TMP_Text ResultCorrectText;
+    [SerializeField] private TMP_Text ResultWrongText;
 
-    public Sprite[] QuestionImages;
+    [SerializeField] private Sprite[] QuestionImages;
 
-    readonly List<QuizQuestion> allQuestions = new List<QuizQuestion>();
-    readonly List<QuizQuestion> remainingQuestions = new List<QuizQuestion>();
-    readonly List<int> currentOptions = new List<int>();
+    private readonly List<QuizQuestion> allQuestions = new List<QuizQuestion>();
+    private readonly List<QuizQuestion> remainingQuestions = new List<QuizQuestion>();
+    private readonly List<int> currentOptions = new List<int>();
 
-    int sessionQuestionCount;
-    int currentQuestionNumber;
-    int score;
-    int correctAnswers;
-    int correctOptionIndex;
+    private int sessionQuestionCount;
+    private int currentQuestionNumber;
+    private int score;
+    private int correctAnswers;
+    private int correctOptionIndex;
 
-    void Awake()
+    private void Awake()
     {
         StartButton.onClick.AddListener(StartGame);
         ExitButton.onClick.AddListener(QuitGame);
@@ -80,7 +73,7 @@ public class EnglishUpGame : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
         allQuestions.Clear();
         for (int i = 0; i < EnglishWords.Length; i++)
@@ -94,19 +87,19 @@ public class EnglishUpGame : MonoBehaviour
         ShowMenu();
     }
 
-    void ShowMenu()
+    private  void ShowMenu()
     {
         MenuScreen.SetActive(true);
         GameScreen.SetActive(false);
         ResultsScreen.SetActive(false);
     }
 
-    void QuitGame()
+    private void QuitGame()
     {
         Application.Quit();
     }
 
-    public void StartGame()
+    private void StartGame()
     {
         score = 0;
         correctAnswers = 0;
