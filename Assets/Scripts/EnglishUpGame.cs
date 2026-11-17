@@ -10,6 +10,8 @@ public class EnglishUpGame : MonoBehaviour
     {
         public string EnglishWord;
         public string RussianTranslation;
+        public List<string> Options = new List<string>();
+        public int CorrectAnswerIndex;
         public Sprite Image;
     }
 
@@ -29,12 +31,13 @@ public class EnglishUpGame : MonoBehaviour
     private static readonly int _pointsPerAnswer = 10;
     private static readonly float _answerDelaySeconds = 1.2f;
 
-    private static readonly Color _normalButtonColor = new Color32(255, 255, 255, 255);
-    private static readonly Color _correctButtonColor = new Color32(76, 175, 80, 255);
-    private static readonly Color _wrongButtonColor = new Color32(229, 57, 53, 255);
-    private static readonly Color _normalTextColor = new Color32(23, 62, 122, 255);
-    private static readonly Color _highlightTextColor = new Color32(255, 255, 255, 255);
+    [SerializeField] private Color _normalButtonColor = new Color32(255, 255, 255, 255);
+    [SerializeField] private Color _correctButtonColor = new Color32(76, 175, 80, 255);
+    [SerializeField] private Color _wrongButtonColor = new Color32(229, 57, 53, 255);
+    [SerializeField] private Color _normalTextColor = new Color32(23, 62, 122, 255);
+    [SerializeField] private Color _highlightTextColor = new Color32(255, 255, 255, 255);
 
+    [SerializeField] private LevelData _currentLevel;
     [SerializeField] private GameObject _menuScreen;
     [SerializeField] private GameObject _gameScreen;
     [SerializeField] private GameObject _resultsScreen;
@@ -55,8 +58,6 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private TMP_Text _resultCorrectText;
     [SerializeField] private TMP_Text _resultWrongText;
 
-    [SerializeField] private Sprite[] _questionImages;
-
     private readonly List<QuizQuestion> _allQuestions = new List<QuizQuestion>();
     private readonly List<QuizQuestion> _remainingQuestions = new List<QuizQuestion>();
     private readonly List<int> _currentOptions = new List<int>();
@@ -73,6 +74,11 @@ public class EnglishUpGame : MonoBehaviour
         _exitButton.onClick.AddListener(_quitGame);
         _playAgainButton.onClick.AddListener(StartGame);
         _menuButton.onClick.AddListener(_showMenu);
+        if (_currentLevel == null)
+        {
+            _currentLevel = ScriptableObject.CreateInstance<LevelData>();
+            CreateDefaultQuestions(_currentLevel);
+        }
         for (int i = 0; i < _answerButtons.Length; i++)
         {
             int answerIndex = i;
@@ -83,14 +89,6 @@ public class EnglishUpGame : MonoBehaviour
     void Start()
     {
         _allQuestions.Clear();
-        for (int i = 0; i < EnglishWords.Length; i++)
-        {
-            QuizQuestion question = new QuizQuestion();
-            question.EnglishWord = EnglishWords[i];
-            question.RussianTranslation = RussianTranslations[i];
-            question.Image = i < _questionImages.Length ? _questionImages[i] : null;
-            _allQuestions.Add(question);
-        }
         _showMenu();
     }
 
@@ -112,10 +110,29 @@ public class EnglishUpGame : MonoBehaviour
         _correctAnswers = 0;
         _currentQuestionNumber = 0;
         _remainingQuestions.Clear();
+        _allQuestions.Clear();
+
+        LevelData levelData = _currentLevel;
+        if (levelData == null)
+        {
+            Debug.LogWarning("Уровень не назначен. Создайте LevelData через Assets/Create/Configs/Levels.");
+            _showMenu();
+            return;
+        }
+
+        foreach (QuestionData question in levelData.Questions)
+        {
+            QuizQuestion quizQuestion = new QuizQuestion();
+            quizQuestion.EnglishWord = question.EnglishWord;
+            quizQuestion.RussianTranslation = question.CorrectTranslation;
+            quizQuestion.Options = new List<string>(question.Options);
+            quizQuestion.CorrectAnswerIndex = question.CorrectAnswerIndex;
+            quizQuestion.Image = question.Image;
+            _allQuestions.Add(quizQuestion);
+        }
 
         List<QuizQuestion> availableQuestions = new List<QuizQuestion>(_allQuestions);
         _sessionQuestionCount = Mathf.Min(_questionsPerGame, availableQuestions.Count);
-
         Shuffle(availableQuestions);
         _remainingQuestions.AddRange(availableQuestions);
 
@@ -128,19 +145,7 @@ public class EnglishUpGame : MonoBehaviour
 
     public void StartLevel(LevelData levelData)
     {
-        _allQuestions.Clear();
-        foreach (QuestionData question in levelData.Questions)
-        {
-            if (question.Image == null)
-            {
-                continue;
-            }
-            QuizQuestion quizQuestion = new QuizQuestion();
-            quizQuestion.EnglishWord = question.EnglishWord;
-            quizQuestion.RussianTranslation = question.CorrectTranslation;
-            quizQuestion.Image = question.Image;
-            _allQuestions.Add(quizQuestion);
-        }
+        _currentLevel = levelData;
         StartGame();
     }
 
@@ -162,23 +167,21 @@ public class EnglishUpGame : MonoBehaviour
         _questionCounterText.text = $"{_currentQuestionNumber} / {_sessionQuestionCount}";
         _scoreText.text = $"Счёт: {_score}";
 
-        int correctTranslationIndex = _indexOfTranslation(question.RussianTranslation);
         _currentOptions.Clear();
-        _currentOptions.Add(correctTranslationIndex);
-        while (_currentOptions.Count < 4)
+        for (int i = 0; i < question.Options.Count; i++)
         {
-            int optionIndex = Random.Range(0, RussianTranslations.Length);
-            if (!_currentOptions.Contains(optionIndex))
-            {
-                _currentOptions.Add(optionIndex);
-            }
+            _currentOptions.Add(i);
         }
         Shuffle(_currentOptions);
-        _correctOptionIndex = _currentOptions.IndexOf(correctTranslationIndex);
+        _correctOptionIndex = _currentOptions.IndexOf(question.CorrectAnswerIndex);
+        while (_currentOptions.Count > _answerButtons.Length)
+        {
+            _currentOptions.RemoveAt(_currentOptions.Count - 1);
+        }
 
         for (int i = 0; i < _answerButtons.Length; i++)
         {
-            _answerTexts[i].text = RussianTranslations[_currentOptions[i]];
+            _answerTexts[i].text = question.Options[_currentOptions[i]];
         }
         _resetAnswerButtons();
     }
@@ -233,16 +236,24 @@ public class EnglishUpGame : MonoBehaviour
         _resultsScreen.SetActive(true);
     }
 
-    private int _indexOfTranslation(string translation)
+    private void CreateDefaultQuestions(LevelData levelData)
     {
-        for (int i = 0; i < RussianTranslations.Length; i++)
+        levelData.LevelNumber = 1;
+        levelData.Questions.Clear();
+        for (int i = 0; i < EnglishWords.Length && i < RussianTranslations.Length; i++)
         {
-            if (RussianTranslations[i] == translation)
-            {
-                return i;
-            }
+            QuestionData question = ScriptableObject.CreateInstance<QuestionData>();
+            question.EnglishWord = EnglishWords[i];
+            question.CorrectTranslation = RussianTranslations[i];
+            question.Options = new List<string>();
+            question.Options.Add(RussianTranslations[i]);
+            question.Options.Add(RussianTranslations[(i + 1) % RussianTranslations.Length]);
+            question.Options.Add(RussianTranslations[(i + 2) % RussianTranslations.Length]);
+            question.Options.Add(RussianTranslations[(i + 3) % RussianTranslations.Length]);
+            question.CorrectAnswerIndex = 0;
+            question.Image = null;
+            levelData.Questions.Add(question);
         }
-        return -1;
     }
 
     private static void Shuffle<T>(List<T> list)
