@@ -6,6 +6,13 @@ using TMPro;
 
 public class EnglishUpGame : MonoBehaviour
 {
+    public class QuizQuestion
+    {
+        public string EnglishWord;
+        public string RussianTranslation;
+        public Sprite Image;
+    }
+
     public static readonly string[] EnglishWords =
     {
         "Apple", "Banana", "Orange", "Cat", "Dog", "House", "Book", "Car", "Sun", "Tree",
@@ -18,203 +25,203 @@ public class EnglishUpGame : MonoBehaviour
         "Школа", "Вода", "Молоко", "Хлеб", "Стул", "Стол", "Цветок", "Рыба", "Птица", "Компьютер"
     };
 
-    private static readonly int QuestionsPerGame = 10;
-    private static readonly int PointsPerAnswer = 10;
-    private static readonly float AnswerDelaySeconds = 1.2f;
+    private static readonly int _questionsPerGame = 10;
+    private static readonly int _pointsPerAnswer = 10;
+    private static readonly float _answerDelaySeconds = 1.2f;
 
-    private static readonly Color NormalButtonColor = new Color32(255, 255, 255, 255);
-    private static readonly Color CorrectButtonColor = new Color32(76, 175, 80, 255);
-    private static readonly Color WrongButtonColor = new Color32(229, 57, 53, 255);
-    private static readonly Color NormalTextColor = new Color32(23, 62, 122, 255);
-    private static readonly Color HighlightTextColor = new Color32(255, 255, 255, 255);
+    private static readonly Color _normalButtonColor = new Color32(255, 255, 255, 255);
+    private static readonly Color _correctButtonColor = new Color32(76, 175, 80, 255);
+    private static readonly Color _wrongButtonColor = new Color32(229, 57, 53, 255);
+    private static readonly Color _normalTextColor = new Color32(23, 62, 122, 255);
+    private static readonly Color _highlightTextColor = new Color32(255, 255, 255, 255);
 
-    [SerializeField] private GameObject MenuScreen;
-    [SerializeField] private GameObject GameScreen;
-    [SerializeField] private GameObject ResultsScreen;
+    [SerializeField] private GameObject _menuScreen;
+    [SerializeField] private GameObject _gameScreen;
+    [SerializeField] private GameObject _resultsScreen;
 
-    [SerializeField] private Button StartButton;
-    [SerializeField] private Button ExitButton;
-    [SerializeField] private Button PlayAgainButton;
-    [SerializeField] private Button MenuButton;
+    [SerializeField] private Button _startButton;
+    [SerializeField] private Button _exitButton;
+    [SerializeField] private Button _playAgainButton;
+    [SerializeField] private Button _menuButton;
 
-    [SerializeField] private TMP_Text QuestionCounterText;
-    [SerializeField] private TMP_Text ScoreText;
-    [SerializeField] private TMP_Text EnglishWordText;
-    [SerializeField] private Image CardImage;
-    [SerializeField] private Button[] AnswerButtons;
-    [SerializeField] private TMP_Text[] AnswerTexts;
+    [SerializeField] private TMP_Text _questionCounterText;
+    [SerializeField] private TMP_Text _scoreText;
+    [SerializeField] private TMP_Text _englishWordText;
+    [SerializeField] private Image _cardImage;
+    [SerializeField] private Button[] _answerButtons;
+    [SerializeField] private TMP_Text[] _answerTexts;
 
-    [SerializeField] private TMP_Text ResultScoreText;
-    [SerializeField] private TMP_Text ResultCorrectText;
-    [SerializeField] private TMP_Text ResultWrongText;
+    [SerializeField] private TMP_Text _resultScoreText;
+    [SerializeField] private TMP_Text _resultCorrectText;
+    [SerializeField] private TMP_Text _resultWrongText;
 
-    [SerializeField] private Sprite[] QuestionImages;
+    [SerializeField] private Sprite[] _questionImages;
 
-    private readonly List<QuizQuestion> allQuestions = new List<QuizQuestion>();
-    private readonly List<QuizQuestion> remainingQuestions = new List<QuizQuestion>();
-    private readonly List<int> currentOptions = new List<int>();
+    private readonly List<QuizQuestion> _allQuestions = new List<QuizQuestion>();
+    private readonly List<QuizQuestion> _remainingQuestions = new List<QuizQuestion>();
+    private readonly List<int> _currentOptions = new List<int>();
 
-    private int sessionQuestionCount;
-    private int currentQuestionNumber;
-    private int score;
-    private int correctAnswers;
-    private int correctOptionIndex;
+    private int _sessionQuestionCount;
+    private int _currentQuestionNumber;
+    private int _score;
+    private int _correctAnswers;
+    private int _correctOptionIndex;
 
-    private void Awake()
+    void Awake()
     {
-        StartButton.onClick.AddListener(StartGame);
-        ExitButton.onClick.AddListener(QuitGame);
-        PlayAgainButton.onClick.AddListener(StartGame);
-        MenuButton.onClick.AddListener(ShowMenu);
-        for (int i = 0; i < AnswerButtons.Length; i++)
+        _startButton.onClick.AddListener(StartGame);
+        _exitButton.onClick.AddListener(_quitGame);
+        _playAgainButton.onClick.AddListener(StartGame);
+        _menuButton.onClick.AddListener(_showMenu);
+        for (int i = 0; i < _answerButtons.Length; i++)
         {
             int answerIndex = i;
-            AnswerButtons[i].onClick.AddListener(() => OnAnswerChosen(answerIndex));
+            _answerButtons[i].onClick.AddListener(() => _onAnswerChosen(answerIndex));
         }
     }
 
-    private void Start()
+    void Start()
     {
-        allQuestions.Clear();
+        _allQuestions.Clear();
         for (int i = 0; i < EnglishWords.Length; i++)
         {
             QuizQuestion question = new QuizQuestion();
             question.EnglishWord = EnglishWords[i];
             question.RussianTranslation = RussianTranslations[i];
-            question.Image = i < QuestionImages.Length ? QuestionImages[i] : null;
-            allQuestions.Add(question);
+            question.Image = i < _questionImages.Length ? _questionImages[i] : null;
+            _allQuestions.Add(question);
         }
-        ShowMenu();
+        _showMenu();
     }
 
-    private  void ShowMenu()
+    private void _showMenu()
     {
-        MenuScreen.SetActive(true);
-        GameScreen.SetActive(false);
-        ResultsScreen.SetActive(false);
+        _menuScreen.SetActive(true);
+        _gameScreen.SetActive(false);
+        _resultsScreen.SetActive(false);
     }
 
-    private void QuitGame()
+    private void _quitGame()
     {
         Application.Quit();
     }
 
-    private void StartGame()
+    public void StartGame()
     {
-        score = 0;
-        correctAnswers = 0;
-        currentQuestionNumber = 0;
-        remainingQuestions.Clear();
+        _score = 0;
+        _correctAnswers = 0;
+        _currentQuestionNumber = 0;
+        _remainingQuestions.Clear();
 
-        List<QuizQuestion> availableQuestions = allQuestions.FindAll(question => question.Image != null);
+        List<QuizQuestion> availableQuestions = _allQuestions.FindAll(question => question.Image != null);
         if (availableQuestions.Count == 0)
         {
             Debug.LogWarning("Нет изображений для вопросов. Добавьте спрайты в Assets/Content/Images и назначьте их в поле QuestionImages.");
-            ShowMenu();
+            _showMenu();
             return;
         }
 
         Shuffle(availableQuestions);
-        remainingQuestions.AddRange(availableQuestions);
-        sessionQuestionCount = Mathf.Min(QuestionsPerGame, remainingQuestions.Count);
+        _remainingQuestions.AddRange(availableQuestions);
+        _sessionQuestionCount = Mathf.Min(_questionsPerGame, _remainingQuestions.Count);
 
-        ResetAnswerButtons();
-        MenuScreen.SetActive(false);
-        ResultsScreen.SetActive(false);
-        GameScreen.SetActive(true);
-        ShowQuestion();
+        _resetAnswerButtons();
+        _menuScreen.SetActive(false);
+        _resultsScreen.SetActive(false);
+        _gameScreen.SetActive(true);
+        _showQuestion();
     }
 
-    void ShowQuestion()
+    private void _showQuestion()
     {
-        if (currentQuestionNumber >= sessionQuestionCount)
+        if (_currentQuestionNumber >= _sessionQuestionCount)
         {
-            ShowResults();
+            _showResults();
             return;
         }
 
-        currentQuestionNumber++;
-        QuizQuestion question = remainingQuestions[0];
-        remainingQuestions.RemoveAt(0);
+        _currentQuestionNumber++;
+        QuizQuestion question = _remainingQuestions[0];
+        _remainingQuestions.RemoveAt(0);
 
-        EnglishWordText.text = question.EnglishWord;
-        CardImage.sprite = question.Image;
-        CardImage.enabled = question.Image != null;
-        QuestionCounterText.text = $"{currentQuestionNumber} / {sessionQuestionCount}";
-        ScoreText.text = $"Счёт: {score}";
+        _englishWordText.text = question.EnglishWord;
+        _cardImage.sprite = question.Image;
+        _cardImage.enabled = question.Image != null;
+        _questionCounterText.text = $"{_currentQuestionNumber} / {_sessionQuestionCount}";
+        _scoreText.text = $"Счёт: {_score}";
 
-        int correctTranslationIndex = IndexOfTranslation(question.RussianTranslation);
-        currentOptions.Clear();
-        currentOptions.Add(correctTranslationIndex);
-        while (currentOptions.Count < 4)
+        int correctTranslationIndex = _indexOfTranslation(question.RussianTranslation);
+        _currentOptions.Clear();
+        _currentOptions.Add(correctTranslationIndex);
+        while (_currentOptions.Count < 4)
         {
             int optionIndex = Random.Range(0, RussianTranslations.Length);
-            if (!currentOptions.Contains(optionIndex))
+            if (!_currentOptions.Contains(optionIndex))
             {
-                currentOptions.Add(optionIndex);
+                _currentOptions.Add(optionIndex);
             }
         }
-        Shuffle(currentOptions);
-        correctOptionIndex = currentOptions.IndexOf(correctTranslationIndex);
+        Shuffle(_currentOptions);
+        _correctOptionIndex = _currentOptions.IndexOf(correctTranslationIndex);
 
-        for (int i = 0; i < AnswerButtons.Length; i++)
+        for (int i = 0; i < _answerButtons.Length; i++)
         {
-            AnswerTexts[i].text = RussianTranslations[currentOptions[i]];
+            _answerTexts[i].text = RussianTranslations[_currentOptions[i]];
         }
-        ResetAnswerButtons();
+        _resetAnswerButtons();
     }
 
-    void OnAnswerChosen(int chosenIndex)
+    private void _onAnswerChosen(int chosenIndex)
     {
-        for (int i = 0; i < AnswerButtons.Length; i++)
+        for (int i = 0; i < _answerButtons.Length; i++)
         {
-            AnswerButtons[i].interactable = false;
+            _answerButtons[i].interactable = false;
         }
 
-        bool isCorrect = chosenIndex == correctOptionIndex;
+        bool isCorrect = chosenIndex == _correctOptionIndex;
         if (isCorrect)
         {
-            score += PointsPerAnswer;
-            correctAnswers++;
+            _score += _pointsPerAnswer;
+            _correctAnswers++;
         }
 
-        AnswerButtons[chosenIndex].image.color = isCorrect ? CorrectButtonColor : WrongButtonColor;
-        AnswerTexts[chosenIndex].color = HighlightTextColor;
-        AnswerButtons[correctOptionIndex].image.color = CorrectButtonColor;
-        AnswerTexts[correctOptionIndex].color = HighlightTextColor;
-        ScoreText.text = $"Счёт: {score}";
+        _answerButtons[chosenIndex].image.color = isCorrect ? _correctButtonColor : _wrongButtonColor;
+        _answerTexts[chosenIndex].color = _highlightTextColor;
+        _answerButtons[_correctOptionIndex].image.color = _correctButtonColor;
+        _answerTexts[_correctOptionIndex].color = _highlightTextColor;
+        _scoreText.text = $"Счёт: {_score}";
 
-        StartCoroutine(GoToNextQuestion());
+        StartCoroutine(_goToNextQuestion());
     }
 
-    IEnumerator GoToNextQuestion()
+    private IEnumerator _goToNextQuestion()
     {
-        yield return new WaitForSeconds(AnswerDelaySeconds);
-        ResetAnswerButtons();
-        ShowQuestion();
+        yield return new WaitForSeconds(_answerDelaySeconds);
+        _resetAnswerButtons();
+        _showQuestion();
     }
 
-    void ResetAnswerButtons()
+    private void _resetAnswerButtons()
     {
-        for (int i = 0; i < AnswerButtons.Length; i++)
+        for (int i = 0; i < _answerButtons.Length; i++)
         {
-            AnswerButtons[i].interactable = true;
-            AnswerButtons[i].image.color = NormalButtonColor;
-            AnswerTexts[i].color = NormalTextColor;
+            _answerButtons[i].interactable = true;
+            _answerButtons[i].image.color = _normalButtonColor;
+            _answerTexts[i].color = _normalTextColor;
         }
     }
 
-    void ShowResults()
+    private void _showResults()
     {
-        int wrongAnswers = sessionQuestionCount - correctAnswers;
-        ResultScoreText.text = $"Итоговый счёт: {score} из {sessionQuestionCount * PointsPerAnswer}";
-        ResultCorrectText.text = $"Правильных ответов: {correctAnswers} из {sessionQuestionCount}";
-        ResultWrongText.text = $"Неправильных ответов: {wrongAnswers}";
-        GameScreen.SetActive(false);
-        ResultsScreen.SetActive(true);
+        int wrongAnswers = _sessionQuestionCount - _correctAnswers;
+        _resultScoreText.text = $"Итоговый счёт: {_score} из {_sessionQuestionCount * _pointsPerAnswer}";
+        _resultCorrectText.text = $"Правильных ответов: {_correctAnswers} из {_sessionQuestionCount}";
+        _resultWrongText.text = $"Неправильных ответов: {wrongAnswers}";
+        _gameScreen.SetActive(false);
+        _resultsScreen.SetActive(true);
     }
 
-    static int IndexOfTranslation(string translation)
+    private int _indexOfTranslation(string translation)
     {
         for (int i = 0; i < RussianTranslations.Length; i++)
         {
@@ -226,7 +233,7 @@ public class EnglishUpGame : MonoBehaviour
         return -1;
     }
 
-    static void Shuffle<T>(List<T> list)
+    private static void Shuffle<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
