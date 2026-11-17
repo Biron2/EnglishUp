@@ -113,23 +113,35 @@ public class EnglishUpGame : MonoBehaviour
         _currentQuestionNumber = 0;
         _remainingQuestions.Clear();
 
-        List<QuizQuestion> availableQuestions = _allQuestions.FindAll(question => question.Image != null);
-        if (availableQuestions.Count == 0)
-        {
-            Debug.LogWarning("Нет изображений для вопросов. Добавьте спрайты в Assets/Content/Images и назначьте их в поле QuestionImages.");
-            _showMenu();
-            return;
-        }
+        List<QuizQuestion> availableQuestions = new List<QuizQuestion>(_allQuestions);
+        _sessionQuestionCount = Mathf.Min(_questionsPerGame, availableQuestions.Count);
 
         Shuffle(availableQuestions);
         _remainingQuestions.AddRange(availableQuestions);
-        _sessionQuestionCount = Mathf.Min(_questionsPerGame, _remainingQuestions.Count);
 
         _resetAnswerButtons();
         _menuScreen.SetActive(false);
         _resultsScreen.SetActive(false);
         _gameScreen.SetActive(true);
         _showQuestion();
+    }
+
+    public void StartLevel(LevelData levelData)
+    {
+        _allQuestions.Clear();
+        foreach (QuestionData question in levelData.Questions)
+        {
+            if (question.Image == null)
+            {
+                continue;
+            }
+            QuizQuestion quizQuestion = new QuizQuestion();
+            quizQuestion.EnglishWord = question.EnglishWord;
+            quizQuestion.RussianTranslation = question.CorrectTranslation;
+            quizQuestion.Image = question.Image;
+            _allQuestions.Add(quizQuestion);
+        }
+        StartGame();
     }
 
     private void _showQuestion()

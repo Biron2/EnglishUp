@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+[CreateAssetMenu(menuName = "Configs/Questions")]
 public class QuestionData : ScriptableObject
 {
     public string EnglishWord;
