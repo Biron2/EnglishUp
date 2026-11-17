@@ -37,7 +37,7 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private Color _normalTextColor = new Color32(23, 62, 122, 255);
     [SerializeField] private Color _highlightTextColor = new Color32(255, 255, 255, 255);
 
-    [SerializeField] private LevelData _currentLevel;
+    [SerializeField] private LevelData[] _levels;
     [SerializeField] private GameObject _menuScreen;
     [SerializeField] private GameObject _gameScreen;
     [SerializeField] private GameObject _resultsScreen;
@@ -74,10 +74,10 @@ public class EnglishUpGame : MonoBehaviour
         _exitButton.onClick.AddListener(_quitGame);
         _playAgainButton.onClick.AddListener(StartGame);
         _menuButton.onClick.AddListener(_showMenu);
-        if (_currentLevel == null)
+        if (_levels == null || _levels.Length == 0)
         {
-            _currentLevel = ScriptableObject.CreateInstance<LevelData>();
-            CreateDefaultQuestions(_currentLevel);
+            _levels = new LevelData[] { ScriptableObject.CreateInstance<LevelData>() };
+            CreateDefaultQuestions(_levels[0]);
         }
         for (int i = 0; i < _answerButtons.Length; i++)
         {
@@ -112,7 +112,7 @@ public class EnglishUpGame : MonoBehaviour
         _remainingQuestions.Clear();
         _allQuestions.Clear();
 
-        LevelData levelData = _currentLevel;
+        LevelData levelData = (_levels != null && _levels.Length > 0) ? _levels[0] : null;
         if (levelData == null)
         {
             Debug.LogWarning("Уровень не назначен. Создайте LevelData через Assets/Create/Configs/Levels.");
@@ -141,12 +141,6 @@ public class EnglishUpGame : MonoBehaviour
         _resultsScreen.SetActive(false);
         _gameScreen.SetActive(true);
         _showQuestion();
-    }
-
-    public void StartLevel(LevelData levelData)
-    {
-        _currentLevel = levelData;
-        StartGame();
     }
 
     private void _showQuestion()

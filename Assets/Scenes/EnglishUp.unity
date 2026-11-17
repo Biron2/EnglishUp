@@ -3200,7 +3200,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc4cdb9f217d14349b9f9b2131d05b8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnglishUpGame
-  _currentLevel: {fileID: 0}
+  _normalButtonColor: {r: 1, g: 1, b: 1, a: 1}
+  _correctButtonColor: {r: 0.29803923, g: 0.6862745, b: 0.3137255, a: 1}
+  _wrongButtonColor: {r: 0.8980392, g: 0.22352941, b: 0.20784314, a: 1}
+  _normalTextColor: {r: 0.09019608, g: 0.24313726, b: 0.47843137, a: 1}
+  _highlightTextColor: {r: 1, g: 1, b: 1, a: 1}
+  _levels:
+  - {fileID: 11400000, guid: 0dae7e151af1ce0458ca230e2b25585b, type: 2}
+  - {fileID: 11400000, guid: 447eecc4a6d76f049a7f8fbf7a672167, type: 2}
+  - {fileID: 11400000, guid: c0d5953412c18474e86200440afd9965, type: 2}
+  - {fileID: 11400000, guid: 8c1df33b1a4b3f44d83f2b57421e36b3, type: 2}
   _menuScreen: {fileID: 386108091}
   _gameScreen: {fileID: 752868587}
   _resultsScreen: {fileID: 1399738733}
