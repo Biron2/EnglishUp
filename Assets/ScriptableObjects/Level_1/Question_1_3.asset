@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d140fda8dedfcd845a4e7e42721d5d8f, type: 3}
   m_Name: Question_1_3
   m_EditorClassIdentifier: Assembly-CSharp::QuestionData
-  EnglishWord: Orange
-  CorrectTranslation: "\u0410\u043F\u0435\u043B\u044C\u0441\u0438\u043D"
+  EnglishWord: Pineapple
+  CorrectTranslation: "\u0410\u043D\u0430\u043D\u0430\u0441"
   Options:
   - "\u042F\u0431\u043B\u043E\u043A\u043E"
   - "\u041A\u043E\u0448\u043A\u0430"
-  - "\u0410\u043F\u0435\u043B\u044C\u0441\u0438\u043D"
+  - "\u0410\u043D\u0430\u043D\u0430\u0441"
   - "\u0411\u0430\u043D\u0430\u043D"
   CorrectAnswerIndex: 2
-  Image: {fileID: 0}
+  Image: {fileID: 21300000, guid: e768a740016325743bf9f4c56ec601c5, type: 3}

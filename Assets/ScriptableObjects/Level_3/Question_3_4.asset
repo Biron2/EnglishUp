@@ -20,4 +20,4 @@ MonoBehaviour:
   - "\u042F\u0431\u043B\u043E\u043A\u043E"
   - "\u0425\u043B\u0435\u0431"
   CorrectAnswerIndex: 3
-  Image: {fileID: 0}
+  Image: {fileID: 21300000, guid: 4327c76035556ef479a0c82e3f3c84d5, type: 3}
