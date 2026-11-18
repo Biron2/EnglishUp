@@ -11,8 +11,8 @@ The project was created as part of a school project to demonstrate the developme
 ## Features
 
 - 4 educational levels
-- 10 questions in each level
-- 50 vocabulary questions in total
+- 5 questions in each level
+- 20 vocabulary questions in total
 - Image-based questions
 - Four translation options for each question
 - Instant answer feedback
