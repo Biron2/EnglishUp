@@ -46,6 +46,7 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _playAgainButton;
     [SerializeField] private Button _menuButton;
+    [SerializeField] private Button _nextLevelButton;
 
     [SerializeField] private TMP_Text _questionCounterText;
     [SerializeField] private TMP_Text _scoreText;
@@ -67,6 +68,7 @@ public class EnglishUpGame : MonoBehaviour
     private int _score;
     private int _correctAnswers;
     private int _correctOptionIndex;
+    private int _currentLevelIndex;
 
     void Awake()
     {
@@ -74,6 +76,7 @@ public class EnglishUpGame : MonoBehaviour
         _exitButton.onClick.AddListener(_quitGame);
         _playAgainButton.onClick.AddListener(StartGame);
         _menuButton.onClick.AddListener(_showMenu);
+        if (_nextLevelButton != null) _nextLevelButton.onClick.AddListener(StartNextLevel);
         if (_levels == null || _levels.Length == 0)
         {
             _levels = new LevelData[] { ScriptableObject.CreateInstance<LevelData>() };
@@ -94,6 +97,7 @@ public class EnglishUpGame : MonoBehaviour
 
     private void _showMenu()
     {
+        _currentLevelIndex = 0;
         _menuScreen.SetActive(true);
         _gameScreen.SetActive(false);
         _resultsScreen.SetActive(false);
@@ -112,7 +116,7 @@ public class EnglishUpGame : MonoBehaviour
         _remainingQuestions.Clear();
         _allQuestions.Clear();
 
-        LevelData levelData = (_levels != null && _levels.Length > 0) ? _levels[0] : null;
+        LevelData levelData = (_levels != null && _levels.Length > 0) ? _levels[_currentLevelIndex % _levels.Length] : null;
         if (levelData == null)
         {
             Debug.LogWarning("Уровень не назначен. Создайте LevelData через Assets/Create/Configs/Levels.");
@@ -141,6 +145,14 @@ public class EnglishUpGame : MonoBehaviour
         _resultsScreen.SetActive(false);
         _gameScreen.SetActive(true);
         _showQuestion();
+    }
+
+    public void StartNextLevel()
+    {
+        if (_levels == null || _levels.Length == 0) return;
+        _currentLevelIndex++;
+        if (_currentLevelIndex >= _levels.Length) _currentLevelIndex = 0;
+        StartGame();
     }
 
     private void _showQuestion()
