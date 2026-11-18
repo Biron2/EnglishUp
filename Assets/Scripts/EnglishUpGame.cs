@@ -28,6 +28,7 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private Button _menuButton;
     [SerializeField] private Button _nextLevelButton;
     [SerializeField] private Button _backFromLevelsButton;
+    [SerializeField] private Button _resetProgressButton;
     [SerializeField] private Button[] _levelButtons;
 
     [SerializeField] private TMP_Text _questionCounterText;
@@ -68,6 +69,7 @@ public class EnglishUpGame : MonoBehaviour
         _menuButton.onClick.AddListener(_showMenu);
         if (_nextLevelButton != null) _nextLevelButton.onClick.AddListener(StartNextLevel);
         if (_backFromLevelsButton != null) _backFromLevelsButton.onClick.AddListener(_showMenu);
+        if (_resetProgressButton != null) _resetProgressButton.onClick.AddListener(_resetProgress);
         if (_levelButtons != null)
         {
             for (int i = 0; i < _levelButtons.Length; i++)
@@ -133,6 +135,13 @@ public class EnglishUpGame : MonoBehaviour
         }
     }
 
+    private void _resetProgress()
+    {
+        _maxUnlockedLevel = 1;
+        PlayerPrefs.SetInt("MaxUnlockedLevel", _maxUnlockedLevel);
+        PlayerPrefs.Save();
+        _updateLevelButtons();
+    }
     private void _onLevelSelected(int index)
     {
         if (index < 0 || index >= _levels.Length) return;
@@ -281,7 +290,7 @@ public class EnglishUpGame : MonoBehaviour
         _resultScoreText.text = $"Итоговый счёт: {_score} из {_sessionQuestionCount * _pointsPerAnswer}";
         _resultCorrectText.text = $"Правильных ответов: {_correctAnswers} из {_sessionQuestionCount}";
         _resultWrongText.text = $"Неправильных ответов: {wrongAnswers}";
-        if (_maxUnlockedLevel < _currentLevelIndex + 2)
+        if (_maxUnlockedLevel < _currentLevelIndex + 2 && _correctAnswers * 2 >= _sessionQuestionCount)
         {
             _maxUnlockedLevel = _currentLevelIndex + 2;
             PlayerPrefs.SetInt("MaxUnlockedLevel", _maxUnlockedLevel);
