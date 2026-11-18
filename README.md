@@ -34,10 +34,6 @@ The project was created as part of a school project to demonstrate the developme
 - TextMeshPro
 - Unity UI
 
-## Screenshots
-
-Screenshots of the game will be added here.
-
 ## Project Status
 
 Developed as a school educational project.
