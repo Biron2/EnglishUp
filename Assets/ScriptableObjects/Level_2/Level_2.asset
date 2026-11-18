@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44197b2d51acf5f4c9dc651e0f6d59be, type: 3}
-  m_Name: LevelSO4
+  m_Name: Level_2
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  LevelNumber: 4
+  LevelNumber: 2
   Questions:
-  - {fileID: 11400000, guid: 5e8c3209d441cb444b57913c990c3490, type: 2}
-  - {fileID: 11400000, guid: 5e8c3209d441cb444b57913c990c3490, type: 2}
-  - {fileID: 11400000, guid: 5e8c3209d441cb444b57913c990c3490, type: 2}
-  - {fileID: 11400000, guid: 5e8c3209d441cb444b57913c990c3490, type: 2}
+  - {fileID: 11400000, guid: 3ca16cc3b2e3a5d4cab57a16d8f876b0, type: 2}
+  - {fileID: 11400000, guid: 3a7cbe538cfbbf7459ecf888e0a4dc66, type: 2}
+  - {fileID: 11400000, guid: 518857bd76786fc4e9a2e60f403fd6c9, type: 2}
+  - {fileID: 11400000, guid: 96e2e138beee8fe47a890291c69b228f, type: 2}
+  - {fileID: 11400000, guid: b7ff173ff060ebe4693f6fbd746863d1, type: 2}

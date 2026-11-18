@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d140fda8dedfcd845a4e7e42721d5d8f, type: 3}
-  m_Name: QuestionDataSO
+  m_Name: Question_3_5
   m_EditorClassIdentifier: Assembly-CSharp::QuestionData
-  EnglishWord: Apple
-  CorrectTranslation: "\u042F\u0431\u043B\u043E\u043A\u043E"
+  EnglishWord: Chair
+  CorrectTranslation: "\u0421\u0442\u0443\u043B"
   Options:
-  - "\u0410\u043D\u0430\u043D\u0430\u0441"
   - "\u042F\u0431\u043B\u043E\u043A\u043E"
-  - "\u0413\u0440\u0443\u0448\u0430"
-  - "\u041F\u0435\u0440\u0441\u0438\u043A"
-  CorrectAnswerIndex: 1
+  - "\u0410\u043F\u0435\u043B\u044C\u0441\u0438\u043D"
+  - "\u0421\u0442\u0443\u043B"
+  - "\u0411\u0430\u043D\u0430\u043D"
+  CorrectAnswerIndex: 2
   Image: {fileID: 0}
