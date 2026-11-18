@@ -6,36 +6,15 @@ using TMPro;
 
 public class EnglishUpGame : MonoBehaviour
 {
-    public class QuizQuestion
-    {
-        public string EnglishWord;
-        public string RussianTranslation;
-        public List<string> Options = new List<string>();
-        public int CorrectAnswerIndex;
-        public Sprite Image;
-    }
-
-    public static readonly string[] EnglishWords =
-    {
-        "Apple", "Banana", "Orange", "Cat", "Dog", "House", "Book", "Car", "Sun", "Tree",
-        "School", "Water", "Milk", "Bread", "Chair", "Table", "Flower", "Fish", "Bird", "Computer"
-    };
-
-    public static readonly string[] RussianTranslations =
-    {
-        "Яблоко", "Банан", "Апельсин", "Кошка", "Собака", "Дом", "Книга", "Машина", "Солнце", "Дерево",
-        "Школа", "Вода", "Молоко", "Хлеб", "Стул", "Стол", "Цветок", "Рыба", "Птица", "Компьютер"
-    };
-
     private static readonly int _questionsPerGame = 10;
     private static readonly int _pointsPerAnswer = 10;
     private static readonly float _answerDelaySeconds = 1.2f;
 
-    [SerializeField] private Color _normalButtonColor = new Color32(255, 255, 255, 255);
-    [SerializeField] private Color _correctButtonColor = new Color32(76, 175, 80, 255);
-    [SerializeField] private Color _wrongButtonColor = new Color32(229, 57, 53, 255);
-    [SerializeField] private Color _normalTextColor = new Color32(23, 62, 122, 255);
-    [SerializeField] private Color _highlightTextColor = new Color32(255, 255, 255, 255);
+    [SerializeField] private Color _normalButtonColor;
+    [SerializeField] private Color _correctButtonColor;
+    [SerializeField] private Color _wrongButtonColor;
+    [SerializeField] private Color _normalTextColor;
+    [SerializeField] private Color _highlightTextColor;
 
     [SerializeField] private LevelData[] _levels;
     [SerializeField] private GameObject _menuScreen;
@@ -48,7 +27,6 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private Button _playAgainButton;
     [SerializeField] private Button _menuButton;
     [SerializeField] private Button _nextLevelButton;
-    [SerializeField] private Button _levelsButton;
     [SerializeField] private Button _backFromLevelsButton;
     [SerializeField] private Button[] _levelButtons;
 
@@ -63,6 +41,12 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private TMP_Text _resultScoreText;
     [SerializeField] private TMP_Text _resultCorrectText;
     [SerializeField] private TMP_Text _resultWrongText;
+
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _correctAnswerClip;
+    [SerializeField] private AudioClip _wrongAnswerClip;
+    [SerializeField] private AudioClip _levelWinClip;
+    [SerializeField] private AudioClip _levelLoseClip;
 
     private readonly List<QuizQuestion> _allQuestions = new List<QuizQuestion>();
     private readonly List<QuizQuestion> _remainingQuestions = new List<QuizQuestion>();
@@ -83,7 +67,6 @@ public class EnglishUpGame : MonoBehaviour
         _playAgainButton.onClick.AddListener(StartGame);
         _menuButton.onClick.AddListener(_showMenu);
         if (_nextLevelButton != null) _nextLevelButton.onClick.AddListener(StartNextLevel);
-        if (_levelsButton != null) _levelsButton.onClick.AddListener(_showLevelsScreen);
         if (_backFromLevelsButton != null) _backFromLevelsButton.onClick.AddListener(_showMenu);
         if (_levelButtons != null)
         {
@@ -93,10 +76,11 @@ public class EnglishUpGame : MonoBehaviour
                 _levelButtons[i].onClick.AddListener(() => _onLevelSelected(index));
             }
         }
-        if (_levels == null || _levels.Length == 0)
+
+        if (_audioSource == null)
         {
-            _levels = new LevelData[] { ScriptableObject.CreateInstance<LevelData>() };
-            CreateDefaultQuestions(_levels[0]);
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
         }
         for (int i = 0; i < _answerButtons.Length; i++)
         {
@@ -268,6 +252,9 @@ public class EnglishUpGame : MonoBehaviour
         _answerTexts[_correctOptionIndex].color = _highlightTextColor;
         _scoreText.text = $"Счёт: {_score}";
 
+        if (isCorrect && _correctAnswerClip != null) _audioSource.PlayOneShot(_correctAnswerClip);
+        else if (!isCorrect && _wrongAnswerClip != null) _audioSource.PlayOneShot(_wrongAnswerClip);
+
         StartCoroutine(_goToNextQuestion());
     }
 
@@ -301,28 +288,16 @@ public class EnglishUpGame : MonoBehaviour
             PlayerPrefs.Save();
         }
         _updateLevelButtons();
+        if (_correctAnswers * 2 >= _sessionQuestionCount)
+        {
+            if (_levelWinClip != null) _audioSource.PlayOneShot(_levelWinClip);
+        }
+        else
+        {
+            if (_levelLoseClip != null) _audioSource.PlayOneShot(_levelLoseClip);
+        }
         _gameScreen.SetActive(false);
         _resultsScreen.SetActive(true);
-    }
-
-    private void CreateDefaultQuestions(LevelData levelData)
-    {
-        levelData.LevelNumber = 1;
-        levelData.Questions.Clear();
-        for (int i = 0; i < EnglishWords.Length && i < RussianTranslations.Length; i++)
-        {
-            QuestionData question = ScriptableObject.CreateInstance<QuestionData>();
-            question.EnglishWord = EnglishWords[i];
-            question.CorrectTranslation = RussianTranslations[i];
-            question.Options = new List<string>();
-            question.Options.Add(RussianTranslations[i]);
-            question.Options.Add(RussianTranslations[(i + 1) % RussianTranslations.Length]);
-            question.Options.Add(RussianTranslations[(i + 2) % RussianTranslations.Length]);
-            question.Options.Add(RussianTranslations[(i + 3) % RussianTranslations.Length]);
-            question.CorrectAnswerIndex = 0;
-            question.Image = null;
-            levelData.Questions.Add(question);
-        }
     }
 
     private static void Shuffle<T>(List<T> list)
