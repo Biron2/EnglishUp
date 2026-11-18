@@ -41,15 +41,20 @@ public class EnglishUpGame : MonoBehaviour
     [SerializeField] private GameObject _menuScreen;
     [SerializeField] private GameObject _gameScreen;
     [SerializeField] private GameObject _resultsScreen;
+    [SerializeField] private GameObject _levelsScreen;
 
     [SerializeField] private Button _startButton;
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _playAgainButton;
     [SerializeField] private Button _menuButton;
     [SerializeField] private Button _nextLevelButton;
+    [SerializeField] private Button _levelsButton;
+    [SerializeField] private Button _backFromLevelsButton;
+    [SerializeField] private Button[] _levelButtons;
 
     [SerializeField] private TMP_Text _questionCounterText;
     [SerializeField] private TMP_Text _scoreText;
+    [SerializeField] private TMP_Text _levelText;
     [SerializeField] private TMP_Text _englishWordText;
     [SerializeField] private Image _cardImage;
     [SerializeField] private Button[] _answerButtons;
@@ -69,14 +74,25 @@ public class EnglishUpGame : MonoBehaviour
     private int _correctAnswers;
     private int _correctOptionIndex;
     private int _currentLevelIndex;
+    private int _maxUnlockedLevel;
 
     void Awake()
     {
-        _startButton.onClick.AddListener(StartGame);
+        _startButton.onClick.AddListener(_showLevelsScreen);
         _exitButton.onClick.AddListener(_quitGame);
         _playAgainButton.onClick.AddListener(StartGame);
         _menuButton.onClick.AddListener(_showMenu);
         if (_nextLevelButton != null) _nextLevelButton.onClick.AddListener(StartNextLevel);
+        if (_levelsButton != null) _levelsButton.onClick.AddListener(_showLevelsScreen);
+        if (_backFromLevelsButton != null) _backFromLevelsButton.onClick.AddListener(_showMenu);
+        if (_levelButtons != null)
+        {
+            for (int i = 0; i < _levelButtons.Length; i++)
+            {
+                int index = i;
+                _levelButtons[i].onClick.AddListener(() => _onLevelSelected(index));
+            }
+        }
         if (_levels == null || _levels.Length == 0)
         {
             _levels = new LevelData[] { ScriptableObject.CreateInstance<LevelData>() };
@@ -91,6 +107,7 @@ public class EnglishUpGame : MonoBehaviour
 
     void Start()
     {
+        _maxUnlockedLevel = PlayerPrefs.GetInt("MaxUnlockedLevel", 1);
         _allQuestions.Clear();
         _showMenu();
     }
@@ -101,6 +118,43 @@ public class EnglishUpGame : MonoBehaviour
         _menuScreen.SetActive(true);
         _gameScreen.SetActive(false);
         _resultsScreen.SetActive(false);
+        if (_levelsScreen != null) _levelsScreen.SetActive(false);
+    }
+
+    private void _showLevelsScreen()
+    {
+        _menuScreen.SetActive(false);
+        _gameScreen.SetActive(false);
+        _resultsScreen.SetActive(false);
+        if (_levelsScreen != null) _levelsScreen.SetActive(true);
+        _updateLevelButtons();
+    }
+
+    private void _updateLevelButtons()
+    {
+        if (_levelButtons == null) return;
+        for (int i = 0; i < _levelButtons.Length; i++)
+        {
+            if (i < _levels.Length)
+            {
+                bool unlocked = (i + 1) <= _maxUnlockedLevel;
+                _levelButtons[i].interactable = unlocked;
+                TMP_Text t = _levelButtons[i].GetComponentInChildren<TMP_Text>();
+                if (t != null) t.text = "Уровень " + (i + 1);
+            }
+            else
+            {
+                _levelButtons[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void _onLevelSelected(int index)
+    {
+        if (index < 0 || index >= _levels.Length) return;
+        if ((index + 1) > _maxUnlockedLevel) return;
+        _currentLevelIndex = index;
+        StartGame();
     }
 
     private void _quitGame()
@@ -143,6 +197,7 @@ public class EnglishUpGame : MonoBehaviour
         _resetAnswerButtons();
         _menuScreen.SetActive(false);
         _resultsScreen.SetActive(false);
+        if (_levelsScreen != null) _levelsScreen.SetActive(false);
         _gameScreen.SetActive(true);
         _showQuestion();
     }
@@ -172,6 +227,7 @@ public class EnglishUpGame : MonoBehaviour
         _cardImage.enabled = question.Image != null;
         _questionCounterText.text = $"{_currentQuestionNumber} / {_sessionQuestionCount}";
         _scoreText.text = $"Счёт: {_score}";
+        _levelText.text = $"Уровень {_currentLevelIndex + 1}";
 
         _currentOptions.Clear();
         for (int i = 0; i < question.Options.Count; i++)
@@ -238,6 +294,13 @@ public class EnglishUpGame : MonoBehaviour
         _resultScoreText.text = $"Итоговый счёт: {_score} из {_sessionQuestionCount * _pointsPerAnswer}";
         _resultCorrectText.text = $"Правильных ответов: {_correctAnswers} из {_sessionQuestionCount}";
         _resultWrongText.text = $"Неправильных ответов: {wrongAnswers}";
+        if (_maxUnlockedLevel < _currentLevelIndex + 2)
+        {
+            _maxUnlockedLevel = _currentLevelIndex + 2;
+            PlayerPrefs.SetInt("MaxUnlockedLevel", _maxUnlockedLevel);
+            PlayerPrefs.Save();
+        }
+        _updateLevelButtons();
         _gameScreen.SetActive(false);
         _resultsScreen.SetActive(true);
     }
